@@ -1,8 +1,9 @@
-import 'package:ant_icons/ant_icons.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:sneakers_hub/models/sneakers_model.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
-import 'package:sneakers_hub/presentation/widgets/product_card.dart';
+import 'package:sneakers_hub/presentation/widgets/home_widget.dart';
+import 'package:sneakers_hub/services/helper.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -13,6 +14,31 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late final TabController tabController = TabController(length: 3, vsync: this);
+
+  late Future<List<SneakersModel>> male;
+  late Future<List<SneakersModel>> female;
+  late Future<List<SneakersModel>> kids;
+
+  @override
+  void initState() {
+    super.initState();
+    getMale();
+    getFemale();
+    getKids();
+  }
+
+  void getMale() {
+    male = Helper().getMenSneakers();
+  }
+
+  void getFemale() {
+    female = Helper().getFemaleSneakers();
+  }
+
+  void getKids() {
+    kids = Helper().getKidsSneakers();
+  }
+
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
@@ -23,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Stack(
           children: [
             Container(
-              padding: const EdgeInsets.fromLTRB(16, 45, 0, 0),
+              padding: const EdgeInsets.fromLTRB(16, 35, 0, 0),
               height: screenHeight * 0.4,
               decoration: const BoxDecoration(
                 borderRadius: BorderRadiusDirectional.only(
@@ -41,22 +67,34 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      "Athletics Shoes",
-                      style: AppStyle.textStyleWithHt(42, Colors.white, FontWeight.bold, 1.5),
-                    ),
-                    Text(
-                      "Collection",
-                      style: AppStyle.textStyleWithHt(42, Colors.white, FontWeight.bold, 1.2),
+                    BounceInDown(
+                      child: SizedBox(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              "Athletics Shoes",
+                              style: AppStyle.textStyleWithHt(42, Colors.white, FontWeight.bold, 1.5),
+                            ),
+                            Text(
+                              "Collection",
+                              style: AppStyle.textStyleWithHt(42, Colors.white, FontWeight.bold, 1.2),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
                     TabBar(
+                      padding: EdgeInsets.zero,
+                      indicator: const BoxDecoration(),
                       indicatorSize: TabBarIndicatorSize.label,
                       indicatorColor: Colors.transparent,
+                      dividerColor: Colors.transparent,
                       controller: tabController,
                       isScrollable: true,
                       labelColor: Colors.white,
                       labelStyle: AppStyle.textStyle(22, Colors.white, FontWeight.bold),
-                      unselectedLabelColor: Colors.grey.withOpacity(0.3),
+                      unselectedLabelColor: Colors.grey.withOpacity(0.4),
                       tabs: const [
                         Tab(text: "Men Shoes"),
                         Tab(text: "Women Shoes"),
@@ -68,108 +106,15 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
             Padding(
-              padding: EdgeInsets.only(top: screenHeight * 0.265),
+              padding: EdgeInsets.only(top: screenHeight * 0.260),
               child: Container(
                 padding: const EdgeInsets.only(left: 12),
                 child: TabBarView(
                   controller: tabController,
                   children: [
-                    Column(
-                      children: [
-                        SizedBox(
-                          height: screenHeight * 0.43,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: 6,
-                            itemBuilder: (context, index) {
-                              return const ProductCard(
-                                id: "1",
-                                name: "Nike",
-                                image:
-                                    "https://www.effectiveecommerce.com/wp-content/uploads/2020/02/nike-shoe-png-nike-shoes-transparent-png-1464-978x1024.png",
-                                price: "\$20.00",
-                                category: "Men's Running",
-                              );
-                            },
-                          ),
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 14, 12, 14),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Latest Shoes",
-                                style: AppStyle.textStyle(24, Colors.black, FontWeight.bold),
-                              ),
-                              Row(
-                                children: [
-                                  Text(
-                                    "Show All",
-                                    style: AppStyle.textStyle(14, Colors.black, FontWeight.w500),
-                                  ),
-                                  const Icon(
-                                    AntIcons.caret_right,
-                                    size: 18,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(
-                          height: screenHeight * 0.13,
-                          child: ListView.builder(
-                            scrollDirection: Axis.horizontal,
-                            itemCount: 6,
-                            itemBuilder: (context, index) {
-                              return Padding(
-                                padding: const EdgeInsets.all(8.0),
-                                child: Container(
-                                  height: screenHeight * 0.12,
-                                  width: screenWidth * 0.26,
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.all(Radius.circular(16)),
-                                    boxShadow: [
-                                      BoxShadow(
-                                        color: Colors.white,
-                                        spreadRadius: 1,
-                                        blurRadius: 0.8,
-                                        offset: Offset(0, 1),
-                                      )
-                                    ],
-                                  ),
-                                  child: Padding(
-                                    padding: const EdgeInsets.all(8.0),
-                                    child: CachedNetworkImage(
-                                      imageUrl:
-                                          "https://www.effectiveecommerce.com/wp-content/uploads/2020/02/nike-shoe-png-nike-shoes-transparent-png-1464-978x1024.png",
-                                    ),
-                                  ),
-                                ),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Container(
-                          height: screenHeight * 0.405,
-                          color: Colors.amber,
-                        )
-                      ],
-                    ),
-                    Column(
-                      children: [
-                        Container(
-                          height: screenHeight * 0.405,
-                          color: Colors.green,
-                        )
-                      ],
-                    ),
+                    HomeWidget(sneakers: male),
+                    HomeWidget(sneakers: female),
+                    HomeWidget(sneakers: kids),
                   ],
                 ),
               ),

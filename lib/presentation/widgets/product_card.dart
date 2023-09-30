@@ -43,21 +43,21 @@ class ProductCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: const EdgeInsets.only(top: 10, right: 10),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  children: [
-                    GestureDetector(
+              Stack(
+                children: [
+                  Container(
+                    height: screenHeight * 0.24,
+                    decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(image))),
+                  ),
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: GestureDetector(
                       onTap: () {},
                       child: const Icon(CommunityMaterialIcons.heart_outline),
                     ),
-                  ],
-                ),
-              ),
-              Container(
-                height: screenHeight * 0.23,
-                decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(image))),
+                  ),
+                ],
               ),
               Padding(
                 padding: const EdgeInsets.only(left: 8, top: 4),
@@ -66,11 +66,11 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       name,
-                      style: AppStyle.textStyleWithHt(34, Colors.black, FontWeight.bold, 1.3),
+                      style: AppStyle.textStyleWithHt(32, Colors.black, FontWeight.bold, 1.2),
                     ),
                     Text(
                       category,
-                      style: AppStyle.textStyleWithHt(16, Colors.grey, FontWeight.w500, 1.2),
+                      style: AppStyle.textStyle(14, Colors.grey, FontWeight.w500),
                     ),
                   ],
                 ),
@@ -82,7 +82,7 @@ class ProductCard extends StatelessWidget {
                   children: [
                     Text(
                       price,
-                      style: AppStyle.textStyleWithHt(28, Colors.black, FontWeight.w600, 1.1),
+                      style: AppStyle.textStyle(24, Colors.black, FontWeight.w500),
                     ),
                     Row(
                       children: [
