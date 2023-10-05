@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:provider/provider.dart';
 import 'package:sneakers_hub/controllers/providers/main_screen_notifier.dart';
+import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
 import 'package:sneakers_hub/presentation/screens/main_screen.dart';
 import 'package:sneakers_hub/presentation/utils/custom_colors.dart';
 
@@ -19,6 +20,7 @@ class MyApp extends StatelessWidget {
     return MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (_) => MainScreenNotifier()),
+        ChangeNotifierProvider(create: (_) => ProductNotifier()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(325, 825),

@@ -2,13 +2,16 @@ import 'package:animate_do/animate_do.dart';
 import 'package:ant_icons/ant_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:sneakers_hub/models/sneakers_model.dart';
+import 'package:sneakers_hub/presentation/screens/product_by_cart.dart';
+import 'package:sneakers_hub/presentation/screens/product_screen.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
-import 'package:sneakers_hub/presentation/widgets/latest_shoe_card.dart';
+import 'package:sneakers_hub/presentation/widgets/new_shoe_card.dart';
 import 'package:sneakers_hub/presentation/widgets/product_card.dart';
 
 class HomeWidget extends StatelessWidget {
-  const HomeWidget({super.key, required this.sneakers});
+  const HomeWidget({super.key, required this.sneakers, required this.tabIndex});
 
+  final int tabIndex;
   final Future<List<SneakersModel>> sneakers;
 
   @override
@@ -46,12 +49,25 @@ class HomeWidget extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final SneakersModel shoe = snapshot.data![index];
 
-                    return ProductCard(
-                      id: shoe.id,
-                      name: shoe.name,
-                      image: shoe.imageUrl[0],
-                      price: "\$${shoe.price}",
-                      category: shoe.category,
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductScreen(
+                              id: shoe.id,
+                              category: shoe.category,
+                            ),
+                          ),
+                        );
+                      },
+                      child: ProductCard(
+                        id: shoe.id,
+                        name: shoe.name,
+                        image: shoe.imageUrl[0],
+                        price: "\$${shoe.price}",
+                        category: shoe.category,
+                      ),
                     );
                   },
                 );
@@ -69,17 +85,29 @@ class HomeWidget extends StatelessWidget {
                   "Latest Shoes",
                   style: AppStyle.textStyle(24, Colors.black, FontWeight.bold),
                 ),
-                Row(
-                  children: [
-                    Text(
-                      "Show All",
-                      style: AppStyle.textStyle(14, Colors.black, FontWeight.w500),
+                GestureDetector(
+                  onTap: () {
+                    Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                            builder: (context) => ProductByCart(
+                                  tabIndex: tabIndex,
+                                )));
+                  },
+                  child: SizedBox(
+                    child: Row(
+                      children: [
+                        Text(
+                          "Show All",
+                          style: AppStyle.textStyle(14, Colors.black, FontWeight.w500),
+                        ),
+                        const Icon(
+                          AntIcons.caret_right,
+                          size: 18,
+                        ),
+                      ],
                     ),
-                    const Icon(
-                      AntIcons.caret_right,
-                      size: 18,
-                    ),
-                  ],
+                  ),
                 ),
               ],
             ),
@@ -115,7 +143,7 @@ class HomeWidget extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final SneakersModel shoe = snapshot.data![index];
 
-                    return LatestShoesCard(
+                    return NewShoesCard(
                       imageUrl: shoe.imageUrl[1],
                     );
                   },
