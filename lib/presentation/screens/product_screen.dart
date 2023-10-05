@@ -1,10 +1,14 @@
 import 'package:ant_icons/ant_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
 import 'package:sneakers_hub/models/sneakers_model.dart';
+import 'package:sneakers_hub/presentation/utils/custom_size.dart';
+import 'package:sneakers_hub/presentation/widgets/app_style.dart';
+import 'package:sneakers_hub/presentation/widgets/checkout_button.dart';
 import 'package:sneakers_hub/services/helper.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -77,6 +81,7 @@ class _ProductScreenState extends State<ProductScreen> {
                         children: [
                           GestureDetector(
                             onTap: () {
+                              productNotifier.sneakersSize.clear();
                               Navigator.pop(context);
                             },
                             child: const Icon(
@@ -131,7 +136,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                       ),
                                     ),
                                     Positioned(
-                                      top: screenHeight * 0.09,
+                                      top: screenHeight * 0.08,
                                       right: 20,
                                       child: const Icon(
                                         AntIcons.heart_outline,
@@ -139,7 +144,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                       ),
                                     ),
                                     Positioned(
-                                      bottom: 0,
+                                      bottom: 3,
                                       right: 0,
                                       left: 0,
                                       height: screenHeight * 0.3,
@@ -160,6 +165,201 @@ class _ProductScreenState extends State<ProductScreen> {
                                   ],
                                 );
                               },
+                            ),
+                          ),
+                          Positioned(
+                            bottom: 30,
+                            child: ClipRRect(
+                              borderRadius: const BorderRadius.only(
+                                topLeft: Radius.circular(30),
+                                topRight: Radius.circular(30),
+                              ),
+                              child: Container(
+                                height: screenHeight * 0.6,
+                                width: screenWidth,
+                                color: Colors.white,
+                                child: Padding(
+                                  padding: const EdgeInsets.only(top: 12, left: 12, right: 12),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        snapshot.data!.name,
+                                        style: AppStyle.textStyle(
+                                          35,
+                                          Colors.black,
+                                          FontWeight.bold,
+                                        ),
+                                      ),
+                                      Row(
+                                        children: [
+                                          Text(
+                                            snapshot.data!.category,
+                                            style: AppStyle.textStyle(
+                                              18,
+                                              Colors.grey,
+                                              FontWeight.w500,
+                                            ),
+                                          ),
+                                          CustomSize.width20,
+                                          RatingBar.builder(
+                                            initialRating: 4.5,
+                                            minRating: 1,
+                                            direction: Axis.horizontal,
+                                            allowHalfRating: true,
+                                            itemCount: 5,
+                                            itemSize: 22,
+                                            itemPadding: const EdgeInsets.symmetric(horizontal: 1),
+                                            itemBuilder: (context, item) {
+                                              return const Icon(
+                                                Icons.star,
+                                                size: 18,
+                                                color: Colors.black,
+                                              );
+                                            },
+                                            onRatingUpdate: (rating) {},
+                                          ),
+                                        ],
+                                      ),
+                                      CustomSize.height15,
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            "\$${snapshot.data!.price}",
+                                            style: AppStyle.textStyle(
+                                              24,
+                                              Colors.black,
+                                              FontWeight.w600,
+                                            ),
+                                          ),
+                                          Row(
+                                            children: [
+                                              Text(
+                                                "Colors",
+                                                style: AppStyle.textStyle(
+                                                  16,
+                                                  Colors.black,
+                                                  FontWeight.w600,
+                                                ),
+                                              ),
+                                              CustomSize.width5,
+                                              const CircleAvatar(
+                                                radius: 6,
+                                                backgroundColor: Colors.black,
+                                              ),
+                                              CustomSize.width5,
+                                              const CircleAvatar(
+                                                radius: 6,
+                                                backgroundColor: Colors.red,
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                      CustomSize.height15,
+                                      Row(
+                                        children: [
+                                          Text(
+                                            "Select sizes",
+                                            style: AppStyle.textStyle(
+                                              18,
+                                              Colors.black,
+                                              FontWeight.w600,
+                                            ),
+                                          ),
+                                          CustomSize.width20,
+                                          Text(
+                                            "View size guide",
+                                            style: AppStyle.textStyle(
+                                              18,
+                                              Colors.grey,
+                                              FontWeight.w600,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      CustomSize.height10,
+                                      SizedBox(
+                                        height: 40,
+                                        child: ListView.builder(
+                                          itemCount: productNotifier.sneakersSize.length,
+                                          scrollDirection: Axis.horizontal,
+                                          padding: EdgeInsets.zero,
+                                          itemBuilder: (context, index) {
+                                            final size = productNotifier.sneakersSize[index];
+                                            return Padding(
+                                              padding: const EdgeInsets.symmetric(horizontal: 6),
+                                              child: ChoiceChip(
+                                                shape: RoundedRectangleBorder(
+                                                  borderRadius: BorderRadius.circular(60),
+                                                  side: const BorderSide(
+                                                    color: Colors.black,
+                                                    width: 1,
+                                                    style: BorderStyle.solid,
+                                                  ),
+                                                ),
+                                                showCheckmark: false,
+                                                materialTapTargetSize: MaterialTapTargetSize.padded,
+                                                visualDensity: const VisualDensity(horizontal: -4, vertical: -1),
+                                                disabledColor: Colors.white,
+                                                label: Text(
+                                                  size['size'],
+                                                  style: AppStyle.textStyle(
+                                                    16,
+                                                    Colors.black,
+                                                    FontWeight.w600,
+                                                  ),
+                                                ),
+                                                selected: size['isSelected'],
+                                                onSelected: (value) {
+                                                  productNotifier.toggleChech(index);
+                                                },
+                                              ),
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      CustomSize.height10,
+                                      const Divider(
+                                        indent: 10,
+                                        endIndent: 10,
+                                        color: Colors.grey,
+                                      ),
+                                      CustomSize.height10,
+                                      SizedBox(
+                                        width: screenWidth * 0.8,
+                                        child: Text(
+                                          snapshot.data!.title,
+                                          style: AppStyle.textStyle(
+                                            24,
+                                            Colors.black,
+                                            FontWeight.w700,
+                                          ),
+                                        ),
+                                      ),
+                                      CustomSize.height10,
+                                      SizedBox(
+                                        child: Text(
+                                          snapshot.data!.description,
+                                          maxLines: 4,
+                                          textAlign: TextAlign.justify,
+                                          style: AppStyle.textStyle(
+                                            14,
+                                            Colors.black,
+                                            FontWeight.normal,
+                                          ),
+                                        ),
+                                      ),
+                                      CustomSize.height15,
+                                      Align(
+                                        alignment: Alignment.bottomCenter,
+                                        child: CheckoutButton(text: "Add to Bag", onTap: () {}),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
                         ],

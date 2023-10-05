@@ -1,6 +1,8 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:ant_icons/ant_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
 import 'package:sneakers_hub/models/sneakers_model.dart';
 import 'package:sneakers_hub/presentation/screens/product_by_cart.dart';
 import 'package:sneakers_hub/presentation/screens/product_screen.dart';
@@ -17,12 +19,13 @@ class HomeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
+    var productNotifier = Provider.of<ProductNotifier>(context);
     return Column(
       children: [
         FadeInRight(
           child: SizedBox(
             height: screenHeight * 0.42,
-            child: FutureBuilder(
+            child: FutureBuilder<List<SneakersModel>>(
               future: sneakers,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
@@ -51,6 +54,7 @@ class HomeWidget extends StatelessWidget {
 
                     return GestureDetector(
                       onTap: () {
+                        productNotifier.sneakersSize = shoe.sizes;
                         Navigator.push(
                           context,
                           MaterialPageRoute(
