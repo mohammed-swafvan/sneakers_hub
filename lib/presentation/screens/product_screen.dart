@@ -2,6 +2,7 @@ import 'package:ant_icons/ant_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
@@ -23,11 +24,16 @@ class ProductScreen extends StatefulWidget {
 
 class _ProductScreenState extends State<ProductScreen> {
   late Future<SneakersModel> sneakers;
+  final cartBox = Hive.box('cart_box');
 
   @override
   void initState() {
     getShoes();
     super.initState();
+  }
+
+  Future<void> createCart(Map<String, dynamic> newCart) async {
+    await cartBox.add(newCart);
   }
 
   void getShoes() {
@@ -313,7 +319,12 @@ class _ProductScreenState extends State<ProductScreen> {
                                                 ),
                                                 selected: size['isSelected'],
                                                 onSelected: (value) {
-                                                  productNotifier.toggleChech(index);
+                                                  if (productNotifier.size.contains(size['size'])) {
+                                                    productNotifier.size.remove(size['size']);
+                                                  } else {
+                                                    productNotifier.size.add(size['size']);
+                                                  }
+                                                  productNotifier.toggleCheck(index);
                                                 },
                                               ),
                                             );
@@ -354,7 +365,24 @@ class _ProductScreenState extends State<ProductScreen> {
                                       CustomSize.height15,
                                       Align(
                                         alignment: Alignment.bottomCenter,
-                                        child: CheckoutButton(text: "Add to Bag", onTap: () {}),
+                                        child: CheckoutButton(
+                                          text: "Add to Cart",
+                                          onTap: () async {
+                                            await createCart({
+                                              "id": snapshot.data!.id,
+                                              "name": snapshot.data!.name,
+                                              "category": snapshot.data!.category,
+                                              "sizes": productNotifier.size,
+                                              "imageUrl": snapshot.data!.imageUrl,
+                                              "price": snapshot.data!.price,
+                                              "quantity": 1,
+                                            });
+                                            productNotifier.sizes.clear();
+                                            if (context.mounted) {
+                                              Navigator.pop(context);
+                                            }
+                                          },
+                                        ),
                                       ),
                                     ],
                                   ),
