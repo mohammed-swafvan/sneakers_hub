@@ -6,7 +6,9 @@ import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
 import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
+import 'package:sneakers_hub/models/constants.dart';
 import 'package:sneakers_hub/models/sneakers_model.dart';
+import 'package:sneakers_hub/presentation/screens/favourites_screen.dart';
 import 'package:sneakers_hub/presentation/utils/custom_size.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
 import 'package:sneakers_hub/presentation/widgets/checkout_button.dart';
@@ -23,8 +25,11 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
+  final PageController pageController = PageController();
   late Future<SneakersModel> sneakers;
+
   final cartBox = Hive.box('cart_box');
+  final favBox = Hive.box('fav_box');
 
   @override
   void initState() {
@@ -34,6 +39,24 @@ class _ProductScreenState extends State<ProductScreen> {
 
   Future<void> createCart(Map<String, dynamic> newCart) async {
     await cartBox.add(newCart);
+  }
+
+  getFavourites() {
+    final favData = favBox.keys.map((key) {
+      final item = favBox.get(key);
+      return {
+        "key": key,
+        "id": item["id"],
+      };
+    }).toList();
+    favor = favData.toList();
+    ids = favBox.keys.map((item) => item["id"]).toList();
+    setState(() {});
+  }
+
+  Future<void> createFav(Map<String, dynamic> newFav) async {
+    await favBox.add(newFav);
+    getFavourites();
   }
 
   void getShoes() {
@@ -48,7 +71,6 @@ class _ProductScreenState extends State<ProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final PageController pageController = PageController();
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -144,9 +166,34 @@ class _ProductScreenState extends State<ProductScreen> {
                                     Positioned(
                                       top: screenHeight * 0.08,
                                       right: 20,
-                                      child: const Icon(
-                                        AntIcons.heart_outline,
-                                        color: Colors.grey,
+                                      child: GestureDetector(
+                                        onTap: () async {
+                                          if (ids.contains(widget.id)) {
+                                            Navigator.push(
+                                              context,
+                                              MaterialPageRoute(
+                                                builder: (context) => FavouritesScreen(),
+                                              ),
+                                            );
+                                          } else {
+                                            await createFav({
+                                              "id": snapshot.data!.id,
+                                              "name": snapshot.data!.name,
+                                              "category": snapshot.data!.category,
+                                              "imageUrl": snapshot.data!.imageUrl[0],
+                                              "price": snapshot.data!.price,
+                                            });
+                                          }
+                                        },
+                                        child: ids.contains(widget.id)
+                                            ? const Icon(
+                                                AntIcons.heart,
+                                                color: Colors.black,
+                                              )
+                                            : const Icon(
+                                                AntIcons.heart_outline,
+                                                color: Colors.grey,
+                                              ),
                                       ),
                                     ),
                                     Positioned(
@@ -372,7 +419,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                               "id": snapshot.data!.id,
                                               "name": snapshot.data!.name,
                                               "category": snapshot.data!.category,
-                                              "sizes": productNotifier.size,
+                                              "sizes": productNotifier.sizes,
                                               "imageUrl": snapshot.data!.imageUrl,
                                               "price": snapshot.data!.price,
                                               "quantity": 1,

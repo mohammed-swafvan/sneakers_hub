@@ -1,8 +1,11 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:sneakers_hub/models/constants.dart';
+import 'package:sneakers_hub/presentation/screens/favourites_screen.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
 
-class ProductCard extends StatelessWidget {
+class ProductCard extends StatefulWidget {
   const ProductCard({
     super.key,
     required this.id,
@@ -19,9 +22,35 @@ class ProductCard extends StatelessWidget {
   final String category;
 
   @override
+  State<ProductCard> createState() => _ProductCardState();
+}
+
+class _ProductCardState extends State<ProductCard> {
+  @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
+
+    final favBox = Hive.box('fav_box');
+
+    getFavourites() {
+      final favData = favBox.keys.map((key) {
+        final item = favBox.get(key);
+        return {
+          "key": key,
+          "id": item["id"],
+        };
+      }).toList();
+      favor = favData.toList();
+      ids = favBox.keys.map((item) => item["id"]).toList();
+      setState(() {});
+    }
+
+    Future<void> createFav(Map<String, dynamic> newFav) async {
+      await favBox.add(newFav);
+      getFavourites();
+    }
+
     bool selected = true;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
@@ -47,14 +76,33 @@ class ProductCard extends StatelessWidget {
                 children: [
                   Container(
                     height: screenHeight * 0.24,
-                    decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(image))),
+                    decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(widget.image))),
                   ),
                   Positioned(
                     top: 10,
                     right: 10,
                     child: GestureDetector(
-                      onTap: () {},
-                      child: const Icon(CommunityMaterialIcons.heart_outline),
+                      onTap: () async {
+                        if (ids.contains(widget.id)) {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => FavouritesScreen(),
+                            ),
+                          );
+                        } else {
+                          await createFav({
+                            "id": widget.id,
+                            "name": widget.name,
+                            "category": widget.category,
+                            "imageUrl": widget.image,
+                            "price": widget.price,
+                          });
+                        }
+                      },
+                      child: ids.contains(widget.id)
+                          ? const Icon(CommunityMaterialIcons.heart)
+                          : const Icon(CommunityMaterialIcons.heart_outline),
                     ),
                   ),
                 ],
@@ -65,11 +113,11 @@ class ProductCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      name,
+                      widget.name,
                       style: AppStyle.textStyleWithHt(32, Colors.black, FontWeight.bold, 1.2),
                     ),
                     Text(
-                      category,
+                      widget.category,
                       style: AppStyle.textStyle(14, Colors.grey, FontWeight.w500),
                     ),
                   ],
@@ -81,7 +129,7 @@ class ProductCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      price,
+                      widget.price,
                       style: AppStyle.textStyle(24, Colors.black, FontWeight.w500),
                     ),
                     Row(
