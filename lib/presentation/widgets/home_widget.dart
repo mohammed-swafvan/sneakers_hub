@@ -69,7 +69,7 @@ class HomeWidget extends StatelessWidget {
                         id: shoe.id,
                         name: shoe.name,
                         image: shoe.imageUrl[0],
-                        price: "\$${shoe.price}",
+                        price: shoe.price,
                         category: shoe.category,
                       ),
                     );

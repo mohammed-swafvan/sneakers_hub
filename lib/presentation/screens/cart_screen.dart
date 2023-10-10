@@ -9,17 +9,18 @@ import 'package:sneakers_hub/presentation/widgets/app_style.dart';
 import 'package:sneakers_hub/presentation/widgets/checkout_button.dart';
 
 class CartScreen extends StatelessWidget {
-  CartScreen({super.key});
-
-  final cartBox = Hive.box('cart_box');
-
-  deleteCart(int key) async {
-    await cartBox.delete(key);
-  }
+  const CartScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final cartBox = Hive.box('cart_box');
+
     List<dynamic> cart = [];
+
+    deleteCart(int key) async {
+      await cartBox.delete(key);
+    }
+
     final cartData = cartBox.keys.map((key) {
       final item = cartBox.get(key);
       return {
@@ -128,24 +129,9 @@ class CartScreen extends StatelessWidget {
                                               data['category'],
                                               style: AppStyle.textStyle(14, Colors.grey, FontWeight.w500),
                                             ),
-                                            Row(
-                                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                              children: [
-                                                Text(
-                                                  "\$${data['price']}",
-                                                  style: AppStyle.textStyle(18, Colors.black, FontWeight.w600),
-                                                ),
-                                                CustomSize.width25,
-                                                Text(
-                                                  "Size",
-                                                  style: AppStyle.textStyle(16, Colors.grey, FontWeight.w500),
-                                                ),
-                                                CustomSize.width10,
-                                                Text(
-                                                  "${data['sizes'].last}",
-                                                  style: AppStyle.textStyle(16, Colors.grey, FontWeight.w500),
-                                                ),
-                                              ],
+                                            Text(
+                                              "\$${data['price']}",
+                                              style: AppStyle.textStyle(18, Colors.black, FontWeight.w600),
                                             ),
                                           ],
                                         ),

@@ -1,7 +1,7 @@
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
-import 'package:hive_flutter/hive_flutter.dart';
-import 'package:sneakers_hub/models/constants.dart';
+import 'package:provider/provider.dart';
+import 'package:sneakers_hub/controllers/providers/favorite_notifier.dart';
 import 'package:sneakers_hub/presentation/screens/favourites_screen.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
 
@@ -11,15 +11,15 @@ class ProductCard extends StatefulWidget {
     required this.id,
     required this.name,
     required this.image,
-    required this.price,
     required this.category,
+    required this.price,
   });
 
   final String id;
   final String name;
   final String image;
-  final String price;
   final String category;
+  final String price;
 
   @override
   State<ProductCard> createState() => _ProductCardState();
@@ -28,29 +28,12 @@ class ProductCard extends StatefulWidget {
 class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var favoriteNotifier = Provider.of<FavoriteNotifier>(context, listen: false);
+      favoriteNotifier.getFavourites();
+    });
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
-
-    final favBox = Hive.box('fav_box');
-
-    getFavourites() {
-      final favData = favBox.keys.map((key) {
-        final item = favBox.get(key);
-        return {
-          "key": key,
-          "id": item["id"],
-        };
-      }).toList();
-      favor = favData.toList();
-      ids = favBox.keys.map((item) => item["id"]).toList();
-      setState(() {});
-    }
-
-    Future<void> createFav(Map<String, dynamic> newFav) async {
-      await favBox.add(newFav);
-      getFavourites();
-    }
-
     bool selected = true;
     return Padding(
       padding: const EdgeInsets.fromLTRB(8, 0, 20, 0),
@@ -81,29 +64,35 @@ class _ProductCardState extends State<ProductCard> {
                   Positioned(
                     top: 10,
                     right: 10,
-                    child: GestureDetector(
-                      onTap: () async {
-                        if (ids.contains(widget.id)) {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => FavouritesScreen(),
-                            ),
-                          );
-                        } else {
-                          await createFav({
-                            "id": widget.id,
-                            "name": widget.name,
-                            "category": widget.category,
-                            "imageUrl": widget.image,
-                            "price": widget.price,
-                          });
-                        }
-                      },
-                      child: ids.contains(widget.id)
-                          ? const Icon(CommunityMaterialIcons.heart)
-                          : const Icon(CommunityMaterialIcons.heart_outline),
-                    ),
+                    child: Consumer<FavoriteNotifier>(builder: (context, favNotifier, _) {
+                      return GestureDetector(
+                        onTap: () async {
+                          if (favNotifier.favId.contains(widget.id)) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const FavouritesScreen(isInsideTheScreen: true),
+                              ),
+                            );
+                          } else {
+                            await favNotifier.createFav(
+                              newFav: {
+                                "id": widget.id,
+                                "name": widget.name,
+                                "category": widget.category,
+                                "imageUrl": widget.image,
+                                "price": widget.price,
+                              },
+                              context: context,
+                            );
+                          }
+                          setState(() {});
+                        },
+                        child: favNotifier.favId.contains(widget.id)
+                            ? const Icon(CommunityMaterialIcons.heart)
+                            : const Icon(CommunityMaterialIcons.heart_outline),
+                      );
+                    }),
                   ),
                 ],
               ),
@@ -129,7 +118,7 @@ class _ProductCardState extends State<ProductCard> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
-                      widget.price,
+                      "\$${widget.price}",
                       style: AppStyle.textStyle(24, Colors.black, FontWeight.w500),
                     ),
                     Row(

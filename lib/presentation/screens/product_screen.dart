@@ -5,8 +5,8 @@ import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
+import 'package:sneakers_hub/controllers/providers/favorite_notifier.dart';
 import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
-import 'package:sneakers_hub/models/constants.dart';
 import 'package:sneakers_hub/models/sneakers_model.dart';
 import 'package:sneakers_hub/presentation/screens/favourites_screen.dart';
 import 'package:sneakers_hub/presentation/utils/custom_size.dart';
@@ -41,24 +41,6 @@ class _ProductScreenState extends State<ProductScreen> {
     await cartBox.add(newCart);
   }
 
-  getFavourites() {
-    final favData = favBox.keys.map((key) {
-      final item = favBox.get(key);
-      return {
-        "key": key,
-        "id": item["id"],
-      };
-    }).toList();
-    favor = favData.toList();
-    ids = favBox.keys.map((item) => item["id"]).toList();
-    setState(() {});
-  }
-
-  Future<void> createFav(Map<String, dynamic> newFav) async {
-    await favBox.add(newFav);
-    getFavourites();
-  }
-
   void getShoes() {
     if (widget.category == "Men's Running") {
       sneakers = Helper().getMenSneakersById(widget.id);
@@ -71,6 +53,10 @@ class _ProductScreenState extends State<ProductScreen> {
 
   @override
   Widget build(BuildContext context) {
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      var favoriteNotifier = Provider.of<FavoriteNotifier>(context, listen: false);
+      favoriteNotifier.getFavourites();
+    });
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -166,35 +152,41 @@ class _ProductScreenState extends State<ProductScreen> {
                                     Positioned(
                                       top: screenHeight * 0.08,
                                       right: 20,
-                                      child: GestureDetector(
-                                        onTap: () async {
-                                          if (ids.contains(widget.id)) {
-                                            Navigator.push(
-                                              context,
-                                              MaterialPageRoute(
-                                                builder: (context) => FavouritesScreen(),
-                                              ),
-                                            );
-                                          } else {
-                                            await createFav({
-                                              "id": snapshot.data!.id,
-                                              "name": snapshot.data!.name,
-                                              "category": snapshot.data!.category,
-                                              "imageUrl": snapshot.data!.imageUrl[0],
-                                              "price": snapshot.data!.price,
-                                            });
-                                          }
-                                        },
-                                        child: ids.contains(widget.id)
-                                            ? const Icon(
-                                                AntIcons.heart,
-                                                color: Colors.black,
-                                              )
-                                            : const Icon(
-                                                AntIcons.heart_outline,
-                                                color: Colors.grey,
-                                              ),
-                                      ),
+                                      child: Consumer<FavoriteNotifier>(builder: (context, favNotifier, _) {
+                                        return GestureDetector(
+                                          onTap: () async {
+                                            if (favNotifier.favId.contains(widget.id)) {
+                                              Navigator.push(
+                                                context,
+                                                MaterialPageRoute(
+                                                  builder: (context) => const FavouritesScreen(isInsideTheScreen: true),
+                                                ),
+                                              );
+                                            } else {
+                                              await favNotifier.createFav(
+                                                newFav: {
+                                                  "id": snapshot.data!.id,
+                                                  "name": snapshot.data!.name,
+                                                  "category": snapshot.data!.category,
+                                                  "imageUrl": snapshot.data!.imageUrl[0],
+                                                  "price": snapshot.data!.price,
+                                                },
+                                                context: context,
+                                              );
+                                            }
+                                            setState(() {});
+                                          },
+                                          child: favNotifier.favId.contains(widget.id)
+                                              ? const Icon(
+                                                  AntIcons.heart,
+                                                  color: Colors.black,
+                                                )
+                                              : const Icon(
+                                                  AntIcons.heart_outline,
+                                                  color: Colors.grey,
+                                                ),
+                                        );
+                                      }),
                                     ),
                                     Positioned(
                                       bottom: 3,
@@ -415,18 +407,22 @@ class _ProductScreenState extends State<ProductScreen> {
                                         child: CheckoutButton(
                                           text: "Add to Cart",
                                           onTap: () async {
-                                            await createCart({
-                                              "id": snapshot.data!.id,
-                                              "name": snapshot.data!.name,
-                                              "category": snapshot.data!.category,
-                                              "sizes": productNotifier.sizes,
-                                              "imageUrl": snapshot.data!.imageUrl,
-                                              "price": snapshot.data!.price,
-                                              "quantity": 1,
-                                            });
-                                            productNotifier.sizes.clear();
-                                            if (context.mounted) {
-                                              Navigator.pop(context);
+                                            if (productNotifier.sizes.isEmpty) {
+                                              AppStyle.showSnackbar("Add Size", context);
+                                            } else {
+                                              await createCart({
+                                                "id": snapshot.data!.id,
+                                                "name": snapshot.data!.name,
+                                                "category": snapshot.data!.category,
+                                                "sizes": productNotifier.sizes,
+                                                "imageUrl": snapshot.data!.imageUrl,
+                                                "price": snapshot.data!.price,
+                                                "quantity": 1,
+                                              });
+                                              productNotifier.sizes.clear();
+                                              if (context.mounted) {
+                                                Navigator.pop(context);
+                                              }
                                             }
                                           },
                                         ),
