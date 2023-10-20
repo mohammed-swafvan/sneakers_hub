@@ -19,7 +19,7 @@ class HomeWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     double screenHeight = MediaQuery.of(context).size.height;
-    var productNotifier = Provider.of<ProductNotifier>(context);
+    var productNotifier = Provider.of<ProductNotifier>(context, listen: false);
     return Column(
       children: [
         FadeInRight(
@@ -30,7 +30,7 @@ class HomeWidget extends StatelessWidget {
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(
-                    child: CircularProgressIndicator(),
+                    child: CircularProgressIndicator.adaptive(),
                   );
                 }
 
@@ -147,8 +147,21 @@ class HomeWidget extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final SneakersModel shoe = snapshot.data![index];
 
-                    return NewShoesCard(
-                      imageUrl: shoe.imageUrl[1],
+                    return GestureDetector(
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => ProductScreen(
+                              id: shoe.id,
+                              category: shoe.category,
+                            ),
+                          ),
+                        );
+                      },
+                      child: NewShoesCard(
+                        imageUrl: shoe.imageUrl[1],
+                      ),
                     );
                   },
                 );

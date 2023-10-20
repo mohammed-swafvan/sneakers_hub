@@ -14,7 +14,7 @@ class FavoriteNotifier extends ChangeNotifier {
   List<dynamic> get favList => fav;
 
   set favId(List<dynamic> newId) {
-    ids.add(newId);
+    ids = newId;
     notifyListeners();
   }
 
@@ -52,12 +52,14 @@ class FavoriteNotifier extends ChangeNotifier {
         "id": item["id"],
       };
     }).toList();
+
     favorites = favData.toList();
-    favId = favBox.keys.map((item) => item["id"]).toList();
+    ids = favorites.map((item) => item["id"]).toList();
+
     notifyListeners();
   }
 
-  Future<void> createFav({required Map<String, dynamic> newFav,required BuildContext context}) async {
+  Future<void> createFav({required Map<String, dynamic> newFav, required BuildContext context}) async {
     await favBox.add(newFav);
     favId.add(newFav["id"]);
     if (context.mounted) {
@@ -66,7 +68,7 @@ class FavoriteNotifier extends ChangeNotifier {
     notifyListeners();
   }
 
-  deleteFav(int key) async {
+  Future<void> deleteFav(int key) async {
     await favBox.delete(key);
     notifyListeners();
   }

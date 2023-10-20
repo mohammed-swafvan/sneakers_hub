@@ -2,9 +2,9 @@ import 'package:ant_icons/ant_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'package:hive_flutter/hive_flutter.dart';
 import 'package:ionicons/ionicons.dart';
 import 'package:provider/provider.dart';
+import 'package:sneakers_hub/controllers/providers/cart_notifier.dart';
 import 'package:sneakers_hub/controllers/providers/favorite_notifier.dart';
 import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
 import 'package:sneakers_hub/models/sneakers_model.dart';
@@ -12,7 +12,6 @@ import 'package:sneakers_hub/presentation/screens/favourites_screen.dart';
 import 'package:sneakers_hub/presentation/utils/custom_size.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
 import 'package:sneakers_hub/presentation/widgets/checkout_button.dart';
-import 'package:sneakers_hub/services/helper.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({super.key, required this.id, required this.category});
@@ -25,44 +24,19 @@ class ProductScreen extends StatefulWidget {
 }
 
 class _ProductScreenState extends State<ProductScreen> {
-  final PageController pageController = PageController();
-  late Future<SneakersModel> sneakers;
-
-  final cartBox = Hive.box('cart_box');
-  final favBox = Hive.box('fav_box');
-
-  @override
-  void initState() {
-    getShoes();
-    super.initState();
-  }
-
-  Future<void> createCart(Map<String, dynamic> newCart) async {
-    await cartBox.add(newCart);
-  }
-
-  void getShoes() {
-    if (widget.category == "Men's Running") {
-      sneakers = Helper().getMenSneakersById(widget.id);
-    } else if (widget.category == "Women's Running") {
-      sneakers = Helper().getFemailSneakersById(widget.id);
-    } else {
-      sneakers = Helper().getKidsSneakersById(widget.id);
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      var favoriteNotifier = Provider.of<FavoriteNotifier>(context, listen: false);
-      favoriteNotifier.getFavourites();
-    });
+    var favoriteNotifier = Provider.of<FavoriteNotifier>(context, listen: false);
+    favoriteNotifier.getFavourites();
+    var productNotifier = Provider.of<ProductNotifier>(context, listen: false);
+    productNotifier.getShoes(widget.category, widget.id);
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
       backgroundColor: Colors.white,
       body: FutureBuilder<SneakersModel>(
-        future: sneakers,
+        future: productNotifier.sneakers,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const Center(
@@ -127,7 +101,7 @@ class _ProductScreenState extends State<ProductScreen> {
                             child: PageView.builder(
                               scrollDirection: Axis.horizontal,
                               itemCount: snapshot.data!.imageUrl.length,
-                              controller: pageController,
+                              controller: productNotifier.pageController,
                               onPageChanged: (page) {
                                 productNotifier.activePage = page;
                               },
@@ -159,7 +133,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                               Navigator.push(
                                                 context,
                                                 MaterialPageRoute(
-                                                  builder: (context) => const FavouritesScreen(isInsideTheScreen: true),
+                                                  builder: (context) => const FavouritesScreen(),
                                                 ),
                                               );
                                             } else {
@@ -404,27 +378,31 @@ class _ProductScreenState extends State<ProductScreen> {
                                       CustomSize.height15,
                                       Align(
                                         alignment: Alignment.bottomCenter,
-                                        child: CheckoutButton(
-                                          text: "Add to Cart",
-                                          onTap: () async {
-                                            if (productNotifier.sizes.isEmpty) {
-                                              AppStyle.showSnackbar("Add Size", context);
-                                            } else {
-                                              await createCart({
-                                                "id": snapshot.data!.id,
-                                                "name": snapshot.data!.name,
-                                                "category": snapshot.data!.category,
-                                                "sizes": productNotifier.sizes,
-                                                "imageUrl": snapshot.data!.imageUrl,
-                                                "price": snapshot.data!.price,
-                                                "quantity": 1,
-                                              });
-                                              productNotifier.sizes.clear();
-                                              if (context.mounted) {
-                                                Navigator.pop(context);
-                                              }
-                                            }
-                                          },
+                                        child: Consumer<CartNotifier>(
+                                          builder: (context, cartNotifier,_) {
+                                            return CheckoutButton(
+                                              text: "Add to Cart",
+                                              onTap: () async {
+                                                if (productNotifier.sizes.isEmpty) {
+                                                  AppStyle.showSnackbar("Add Size", context);
+                                                } else {
+                                                  await cartNotifier.createCart({
+                                                    "id": snapshot.data!.id,
+                                                    "name": snapshot.data!.name,
+                                                    "category": snapshot.data!.category,
+                                                    "sizes": productNotifier.sizes,
+                                                    "imageUrl": snapshot.data!.imageUrl,
+                                                    "price": snapshot.data!.price,
+                                                    "quantity": 1,
+                                                  });
+                                                  productNotifier.sizes.clear();
+                                                  if (context.mounted) {
+                                                    Navigator.pop(context);
+                                                  }
+                                                }
+                                              },
+                                            );
+                                          }
                                         ),
                                       ),
                                     ],

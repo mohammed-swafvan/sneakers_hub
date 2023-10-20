@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
+import 'package:sneakers_hub/controllers/providers/cart_notifier.dart';
 import 'package:sneakers_hub/controllers/providers/favorite_notifier.dart';
 import 'package:sneakers_hub/controllers/providers/main_screen_notifier.dart';
 import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
@@ -26,11 +27,13 @@ class MyApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider(create: (_) => MainScreenNotifier()),
         ChangeNotifierProvider(create: (_) => ProductNotifier()),
+        ChangeNotifierProvider(create: (_) => CartNotifier()),
         ChangeNotifierProvider(create: (_) => FavoriteNotifier()),
       ],
       child: ScreenUtilInit(
         designSize: const Size(325, 825),
         minTextAdapt: true,
+        splitScreenMode: true,
         builder: (context, child) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,

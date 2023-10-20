@@ -1,12 +1,12 @@
 import 'package:ant_icons/ant_icons.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:sneakers_hub/models/sneakers_model.dart';
+import 'package:provider/provider.dart';
+import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
 import 'package:sneakers_hub/presentation/utils/custom_size.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
 import 'package:sneakers_hub/presentation/widgets/category_button.dart';
 import 'package:sneakers_hub/presentation/widgets/latest_shoes.dart';
-import 'package:sneakers_hub/services/helper.dart';
 
 class ProductByCart extends StatefulWidget {
   const ProductByCart({super.key, required this.tabIndex});
@@ -20,30 +20,6 @@ class ProductByCart extends StatefulWidget {
 class _ProductByCartState extends State<ProductByCart> with TickerProviderStateMixin {
   late final TabController tabController = TabController(length: 3, vsync: this, initialIndex: widget.tabIndex);
 
-  late Future<List<SneakersModel>> male;
-  late Future<List<SneakersModel>> female;
-  late Future<List<SneakersModel>> kids;
-
-  @override
-  void initState() {
-    super.initState();
-    getMale();
-    getFemale();
-    getKids();
-  }
-
-  void getMale() {
-    male = Helper().getMenSneakers();
-  }
-
-  void getFemale() {
-    female = Helper().getFemaleSneakers();
-  }
-
-  void getKids() {
-    kids = Helper().getKidsSneakers();
-  }
-
   List<String> brand = [
     "assets/images/addidas.png",
     "assets/images/gucci.png",
@@ -53,6 +29,10 @@ class _ProductByCartState extends State<ProductByCart> with TickerProviderStateM
 
   @override
   Widget build(BuildContext context) {
+    final productNotifier = Provider.of<ProductNotifier>(context, listen: false);
+    productNotifier.getMale();
+    productNotifier.getFemale();
+    productNotifier.getKids();
     final double screenHeight = MediaQuery.of(context).size.height;
     return Scaffold(
       body: SizedBox(
@@ -125,13 +105,17 @@ class _ProductByCartState extends State<ProductByCart> with TickerProviderStateM
               padding: EdgeInsets.only(top: screenHeight * 0.16, left: 16, right: 12),
               child: ClipRRect(
                 borderRadius: const BorderRadius.all(Radius.circular(16)),
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    LatestShoes(shoe: male),
-                    LatestShoes(shoe: female),
-                    LatestShoes(shoe: kids),
-                  ],
+                child: Consumer<ProductNotifier>(
+                  builder: (context, productNotifier,_) {
+                    return TabBarView(
+                      controller: tabController,
+                      children: [
+                        LatestShoes(shoe: productNotifier.male),
+                        LatestShoes(shoe: productNotifier.female),
+                        LatestShoes(shoe: productNotifier.kids),
+                      ],
+                    );
+                  }
                 ),
               ),
             ),

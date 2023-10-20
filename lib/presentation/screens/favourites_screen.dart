@@ -1,4 +1,3 @@
-import 'package:ant_icons/ant_icons.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:ionicons/ionicons.dart';
@@ -8,15 +7,12 @@ import 'package:sneakers_hub/presentation/screens/main_screen.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
 
 class FavouritesScreen extends StatelessWidget {
-  const FavouritesScreen({super.key, required this.isInsideTheScreen});
-  final bool isInsideTheScreen;
+  const FavouritesScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
-      var favProvider = Provider.of<FavoriteNotifier>(context, listen: false);
-      favProvider.getAllData();
-    });
+    var favProvider = Provider.of<FavoriteNotifier>(context, listen: false);
+    favProvider.getAllData();
     final double screenHeight = MediaQuery.of(context).size.height;
     final double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -28,7 +24,7 @@ class FavouritesScreen extends StatelessWidget {
             return Stack(
               children: [
                 Container(
-                  padding: const EdgeInsets.fromLTRB(14, 35, 0, 0),
+                  padding: const EdgeInsets.fromLTRB(14, 20, 0, 0),
                   height: screenHeight * 0.35,
                   width: screenWidth,
                   decoration: const BoxDecoration(
@@ -42,28 +38,13 @@ class FavouritesScreen extends StatelessWidget {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(8.0),
+                    padding: const EdgeInsets.symmetric(horizontal: 8.0),
                     child: Text(
                       "My Favorites",
                       style: AppStyle.textStyle(
                         36,
                         Colors.white,
                         FontWeight.bold,
-                      ),
-                    ),
-                  ),
-                ),
-                Visibility(
-                  visible: isInsideTheScreen,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(16, 20, 0, 0),
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Icon(
-                        AntIcons.close,
-                        color: Colors.white,
                       ),
                     ),
                   ),
@@ -83,7 +64,7 @@ class FavouritesScreen extends StatelessWidget {
                         padding: const EdgeInsets.all(8.0),
                         child: ListView.builder(
                           itemCount: favnotifier.favList.length,
-                          padding: const EdgeInsets.only(top: 90),
+                          padding: const EdgeInsets.only(top: 65),
                           itemBuilder: (context, index) {
                             final shoe = favnotifier.favList[index];
                             return Padding(

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:community_material_icon/community_material_icon.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -28,10 +29,9 @@ class ProductCard extends StatefulWidget {
 class _ProductCardState extends State<ProductCard> {
   @override
   Widget build(BuildContext context) {
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      var favoriteNotifier = Provider.of<FavoriteNotifier>(context, listen: false);
-      favoriteNotifier.getFavourites();
-    });
+    var favoriteNotifier = Provider.of<FavoriteNotifier>(context, listen: false);
+    favoriteNotifier.getFavourites();
+
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     bool selected = true;
@@ -57,9 +57,12 @@ class _ProductCardState extends State<ProductCard> {
             children: [
               Stack(
                 children: [
-                  Container(
+                  SizedBox(
                     height: screenHeight * 0.24,
-                    decoration: BoxDecoration(image: DecorationImage(image: NetworkImage(widget.image))),
+                    width: screenWidth * 0.8,
+                    child: CachedNetworkImage(
+                      imageUrl: widget.image,
+                    ),
                   ),
                   Positioned(
                     top: 10,
@@ -71,7 +74,7 @@ class _ProductCardState extends State<ProductCard> {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => const FavouritesScreen(isInsideTheScreen: true),
+                                builder: (context) => const FavouritesScreen(),
                               ),
                             );
                           } else {

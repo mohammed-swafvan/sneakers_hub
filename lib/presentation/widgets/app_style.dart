@@ -21,7 +21,7 @@ class AppStyle {
   }
 
   static showSnackbar(String content, BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
+    return ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         duration: const Duration(seconds: 3),
         shape: RoundedRectangleBorder(

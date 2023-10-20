@@ -1,9 +1,10 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
-import 'package:sneakers_hub/models/sneakers_model.dart';
+import 'package:provider/provider.dart';
+import 'package:sneakers_hub/controllers/providers/product_screen_notifier.dart';
+import 'package:sneakers_hub/presentation/utils/custom_size.dart';
 import 'package:sneakers_hub/presentation/widgets/app_style.dart';
 import 'package:sneakers_hub/presentation/widgets/home_widget.dart';
-import 'package:sneakers_hub/services/helper.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -14,33 +15,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   late final TabController tabController = TabController(length: 3, vsync: this);
-
-  late Future<List<SneakersModel>> male;
-  late Future<List<SneakersModel>> female;
-  late Future<List<SneakersModel>> kids;
-
-  @override
-  void initState() {
-    super.initState();
-    getMale();
-    getFemale();
-    getKids();
-  }
-
-  void getMale() {
-    male = Helper().getMenSneakers();
-  }
-
-  void getFemale() {
-    female = Helper().getFemaleSneakers();
-  }
-
-  void getKids() {
-    kids = Helper().getKidsSneakers();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final productNotifier = Provider.of<ProductNotifier>(context, listen: false);
+    productNotifier.getMale();
+    productNotifier.getFemale();
+    productNotifier.getKids();
     double screenHeight = MediaQuery.of(context).size.height;
     double screenWidth = MediaQuery.of(context).size.width;
     return Scaffold(
@@ -49,7 +29,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
         child: Stack(
           children: [
             Container(
-              padding: const EdgeInsets.fromLTRB(16, 35, 0, 0),
+              padding: const EdgeInsets.fromLTRB(16, 25, 0, 0),
               height: screenHeight * 0.35,
               decoration: const BoxDecoration(
                 borderRadius: BorderRadiusDirectional.only(
@@ -58,7 +38,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
                 image: DecorationImage(
                   image: AssetImage("assets/images/top_image.jpeg"),
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                 ),
               ),
               child: Container(
@@ -84,6 +64,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                       ),
                     ),
+                    CustomSize.height10,
                     TabBar(
                       padding: EdgeInsets.zero,
                       indicator: const BoxDecoration(),
@@ -109,23 +90,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               padding: EdgeInsets.only(top: screenHeight * 0.260),
               child: Container(
                 padding: const EdgeInsets.only(left: 12),
-                child: TabBarView(
-                  controller: tabController,
-                  children: [
-                    HomeWidget(
-                      sneakers: male,
-                      tabIndex: 0,
-                    ),
-                    HomeWidget(
-                      sneakers: female,
-                      tabIndex: 1,
-                    ),
-                    HomeWidget(
-                      sneakers: kids,
-                      tabIndex: 2,
-                    ),
-                  ],
-                ),
+                child: Consumer<ProductNotifier>(builder: (context, productNotifier, _) {
+                  return TabBarView(
+                    controller: tabController,
+                    children: [
+                      HomeWidget(
+                        sneakers: productNotifier.male,
+                        tabIndex: 0,
+                      ),
+                      HomeWidget(
+                        sneakers: productNotifier.female,
+                        tabIndex: 1,
+                      ),
+                      HomeWidget(
+                        sneakers: productNotifier.kids,
+                        tabIndex: 2,
+                      ),
+                    ],
+                  );
+                }),
               ),
             ),
           ],

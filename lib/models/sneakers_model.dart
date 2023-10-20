@@ -1,6 +1,9 @@
 import 'dart:convert';
 
-List<SneakersModel> sneakersFromJson(String str) => List<SneakersModel>.from(json.decode(str).map((x) => SneakersModel.fromJson(x)));
+List<SneakersModel> sneakersFromJson(String str) =>
+    List<SneakersModel>.from(json.decode(str).map((x) => SneakersModel.fromJson(x)));
+
+String sneakersToJson(List<SneakersModel> data) => json.encode(List<dynamic>.from(data.map((e) => e.toJson())));
 
 class SneakersModel {
   SneakersModel({
@@ -36,4 +39,16 @@ class SneakersModel {
         description: json["description"],
         title: json["title"],
       );
+
+  Map<String, dynamic> toJson() => {
+        "id": id,
+        "name": name,
+        "category": category,
+        "imageUrl": imageUrl,
+        "oldPrice": oldPrice,
+        "price": price,
+        "sizes": sizes,
+        "description": description,
+        "title": title,
+      };
 }
